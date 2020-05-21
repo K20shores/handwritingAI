@@ -2,13 +2,14 @@ import numpy as np
 
 class NeuralHandwritingNet:
 
-    def __init__():
+
+    def __init__(self):
         pass
 
-    def backward_propogation():
+    def backward_propogation(self):
         pass
 
-    def feedforward():
+    def feedforward(self):
         pass
 
 if __name__ == '__main__':
