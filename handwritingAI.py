@@ -1,6 +1,7 @@
 import numpy as np
 import struct
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 class DataReader:
     def __init__(self, file_name, magic_number):
@@ -20,14 +21,19 @@ class DataReader:
         if self.magic_number != number:
             raise Exception("Invalid magic number. Make sure you are reading the number in big-endian format")
 
-    def unpack_file_contents(self):
+    def read_all_contents(self):
         return list(struct.iter_unpack(">B", self.file_contents[self.offset:]))
+
+    def read_n_bytes(self, n):
+        data = struct.unpack(">" + "B" * n, self.file_contents[self.offset:self.offset+n])
+        self.offset += n
+        return data
 
 class LabelDataReader(DataReader):
     def __init__(self, file_name):
         super().__init__(file_name, 2049)
 
-    def read(self):
+    def read(self, n = None):
         """ Read the data format. Returns a list of labels [0-9]
 
         Format is from MNIST http://yann.lecun.com/exdb/mnist/
@@ -36,31 +42,51 @@ class LabelDataReader(DataReader):
         magic_number,data_length = self.read_header(">ii")
         self.check_magic_number(magic_number)
 
+        if n is not None:
+            data_length = n
+
         print(f"Unpacking {data_length} label values")
-        labels = np.array(self.unpack_file_contents())
+        if n is None:
+            labels = np.array(self.read_all_contents())
+        else:
+            labels = np.array(self.read_n_bytes(n))
         print(f"Finished unpacking labels")
 
         if (len(labels) != data_length):
             raise Exception(f"Failed to read the correct number of data values. Read {len(labels)}, expected {data_length}")
 
         return labels
+        # is this needed?
+        #return np.array([self.make_label_data(x) for x in labels])
+
+    def make_label_data(self, x):
+        data = ([0] * 10)
+        data[x] = 1
+        return data
 
 class ImageDataReader(DataReader):
     def __init__(self, file_name):
         super().__init__(file_name, 2051)
 
-    def read(self):
-        """ Read the data format. Returns a list of np 2-d arrays
+    def read(self, n = None):
+        """ Read the data format. Returns a list of numpy 1-d arrays
 
         Format is from MNIST http://yann.lecun.com/exdb/mnist/
+        Each array contains all of the pixels for one image
         """
 
         magic_number,n_images, n_rows, n_columns = self.read_header(">iiii")
         self.check_magic_number(magic_number)
 
+        if n is not None:
+            n_images = n
+
         print(f"Unpacking {n_images} images")
         print(f"Image size (row, column): ({n_rows}, {n_columns})")
-        images = np.reshape(self.unpack_file_contents(), (n_images, n_columns * n_rows))
+        if n is None:
+            images = np.reshape(self.read_all_contents(), (n_images, n_columns * n_rows))
+        else:
+            images = np.reshape(self.read_n_bytes(n * n_columns * n_rows), (n_images, n_columns * n_rows))
         print(f"Finished unpacking images")
 
         if (len(images) != n_images):
@@ -107,23 +133,32 @@ class NeuralHandwritingNet:
         self.weights1 += d_weights1
         self.weights2 += d_weights2
 
-    #https://stackoverflow.com/a/29863846/5217293
     def __sigmoid(self, x):
-        return np.exp(-np.logaddexp(0, -x))
+        #could also use https://stackoverflow.com/a/29863846/5217293
+        return 1 / (1 + np.exp(-x))
 
     def __sigmoid_derivative(self, x):
         return self.__sigmoid(x) * (1 - self.__sigmoid(x))
 
+def show_image(data):
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+    ax.imshow(data)
+    plt.show()
+
 if __name__ == '__main__':
+    n = 10
     label_reader = LabelDataReader("training_data/train-labels-idx1-ubyte")
-    labels = label_reader.read()[:1000]
+    labels = label_reader.read(n)
 
     image_reader = ImageDataReader("training_data/train-images-idx3-ubyte")
-    images = image_reader.read()[:1000]
+    images = image_reader.read(n)
 
+    #x = np.array([[0, 0, 1, 1], [0, 1, 0, 1], [1, 1, 1, 1]]).T
+    #y = np.array([[0], [1], [1], [0]])
     ai = NeuralHandwritingNet(images, labels)
 
-    for i in tqdm(range(1500), desc='Training'):
+    for i in tqdm(range(10000), desc='Training'):
         ai.train()
 
     print(ai.output)
