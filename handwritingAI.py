@@ -32,6 +32,7 @@ class DataReader:
 class LabelDataReader(DataReader):
     def __init__(self, file_name):
         super().__init__(file_name, 2049)
+        self.image_size = None
 
     def read(self, n = None):
         """ Read the data format. Returns a list of labels [0-9]
@@ -75,13 +76,14 @@ class ImageDataReader(DataReader):
         """
 
         magic_number,n_images, n_rows, n_columns = self.read_header(">iiii")
+        self.image_size = (n_rows, n_columns)
         self.check_magic_number(magic_number)
 
         if n is not None:
             n_images = n
 
         print(f"Unpacking {n_images} images")
-        print(f"Image size (row, column): ({n_rows}, {n_columns})")
+        print(f"Image size (row, column): ({self.image_size})")
         if n is None:
             images = np.reshape(self.read_all_contents(), (n_images, n_columns * n_rows)) / 255
         else:
@@ -165,15 +167,16 @@ def show_image_grid(data):
     plt.show()
 
 if __name__ == '__main__':
-    n = 1000
+    n = int(1e4)
     label_reader = LabelDataReader("training_data/train-labels-idx1-ubyte")
     labels = label_reader.read(n)
 
     image_reader = ImageDataReader("training_data/train-images-idx3-ubyte")
     images = image_reader.read(n)
+    image_size = image_reader.image_size
 
-    #show_image(np.reshape(images[0], (28, 28)))
-    #show_image_grid(np.reshape(images, (n, 28, 28)))
+    #show_image(np.reshape(images[0], image_reader.image_size))
+    #show_image_grid(np.reshape(images, (n, image_size[0], image_size[1])))
 
     ai = NeuralHandwritingNet(images, labels)
 
