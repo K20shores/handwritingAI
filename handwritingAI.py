@@ -47,16 +47,15 @@ class LabelDataReader(DataReader):
 
         print(f"Unpacking {data_length} label values")
         if n is None:
-            labels = np.array(self.read_all_contents())
+            labels = np.array([[x] for x in self.read_all_contents()])
         else:
-            labels = np.array(self.read_n_bytes(n))
+            labels = np.array([[x] for x in self.read_n_bytes(n)])
         print(f"Finished unpacking labels")
 
         if (len(labels) != data_length):
             raise Exception(f"Failed to read the correct number of data values. Read {len(labels)}, expected {data_length}")
 
         return labels
-        # is this needed?
         #return np.array([self.make_label_data(x) for x in labels])
 
     def make_label_data(self, x):
@@ -84,9 +83,9 @@ class ImageDataReader(DataReader):
         print(f"Unpacking {n_images} images")
         print(f"Image size (row, column): ({n_rows}, {n_columns})")
         if n is None:
-            images = np.reshape(self.read_all_contents(), (n_images, n_columns * n_rows))
+            images = np.reshape(self.read_all_contents(), (n_images, n_columns * n_rows)) / 255
         else:
-            images = np.reshape(self.read_n_bytes(n * n_columns * n_rows), (n_images, n_columns * n_rows))
+            images = np.reshape(self.read_n_bytes(n * n_columns * n_rows), (n_images, n_columns * n_rows)) / 255
         print(f"Finished unpacking images")
 
         if (len(images) != n_images):
@@ -98,8 +97,8 @@ class NeuralHandwritingNet:
     def __init__(self, x, y):
         self.input = x
         self.y = y
-        self.weights1 = np.random.rand(self.input.shape[1],4)
-        self.weights2 = np.random.rand(4,1)
+        self.weights1 = np.random.rand(self.input.shape[1],16)
+        self.weights2 = np.random.rand(16,10)
         self.output = np.zeros(self.y.shape)
 
     def train(self):
@@ -143,23 +142,42 @@ class NeuralHandwritingNet:
 def show_image(data):
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    ax.imshow(data)
+    ax.imshow(data, cmap='binary')
+    plt.xticks([])
+    plt.yticks([])
+    plt.show()
+
+def show_image_grid(data):
+    n_rows = int(np.ceil(np.sqrt(data.shape[0])))
+    n_cols = int(np.floor(np.sqrt(data.shape[0])))
+    print((n_rows, n_cols))
+    fig, axs = plt.subplots(n_rows, n_cols)
+
+    for row in range(n_rows):
+        for col in range(n_cols):
+            ax = axs[row][col]
+            idx = n_cols * row + col
+            if (idx >= data.shape[0]):
+                ax.set_visible(False)
+            else:
+                ax.imshow(data[idx], cmap='binary')
+                ax.set_xticks([])
+                ax.set_yticks([])
     plt.show()
 
 if __name__ == '__main__':
-    n = 10
+    n = 100
     label_reader = LabelDataReader("training_data/train-labels-idx1-ubyte")
     labels = label_reader.read(n)
 
     image_reader = ImageDataReader("training_data/train-images-idx3-ubyte")
     images = image_reader.read(n)
 
-    #x = np.array([[0, 0, 1, 1], [0, 1, 0, 1], [1, 1, 1, 1]]).T
-    #y = np.array([[0], [1], [1], [0]])
+    #show_image(np.reshape(images[0], (28, 28)))
+    #show_image_grid(np.reshape(images, (n, 28, 28)))
+
     ai = NeuralHandwritingNet(images, labels)
 
-    for i in tqdm(range(10000), desc='Training'):
+    for i in tqdm(range(int(1e3)), desc='Training'):
         ai.train()
-
-    print(ai.output)
 
