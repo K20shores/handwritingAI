@@ -149,8 +149,7 @@ def show_image(data):
 
 def show_image_grid(data):
     n_rows = int(np.ceil(np.sqrt(data.shape[0])))
-    n_cols = int(np.floor(np.sqrt(data.shape[0])))
-    print((n_rows, n_cols))
+    n_cols = n_rows
     fig, axs = plt.subplots(n_rows, n_cols)
 
     for row in range(n_rows):
@@ -166,7 +165,7 @@ def show_image_grid(data):
     plt.show()
 
 if __name__ == '__main__':
-    n = 100
+    n = 1000
     label_reader = LabelDataReader("training_data/train-labels-idx1-ubyte")
     labels = label_reader.read(n)
 
