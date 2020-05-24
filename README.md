@@ -9,14 +9,18 @@ Self-made Neural Network to classify handwritten numbers
 The training data can be found [here](http://yann.lecun.com/exdb/mnist/).
 
 ## Training data
-`wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz`
-`wget http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz`
-`gzip -d *.gz`
+```
+wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
+wget http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
+gzip -d *.gz
+```
 
 ## Test data
-`wget http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz`
-`wget http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz`
-`gzip -d *.gz`
+```
+wget http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz
+wget http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz
+gzip -d *.gz
+```
 
 # Run
 Modify `make_graph.py` and then run `python3 handwritingAI.py`
