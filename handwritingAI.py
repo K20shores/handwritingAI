@@ -4,6 +4,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import random
 import codecs, json
+import argparse
 
 class NeuralHandwritingNetConfig:
     def __init__(self):
@@ -120,7 +121,6 @@ class ImageDataReader(DataReader):
             n_images = n
 
         print(f"Unpacking {n_images} images")
-        print(f"Image size (row, column): {self.image_size}")
         shape = (n_images, n_columns * n_rows, 1)
         if n is None:
             images = np.reshape(self.read_all_contents(), shape) / 255
@@ -273,22 +273,25 @@ def show_image_grid(data):
                 ax.set_yticks([])
     plt.show()
 
-def get_training_data(n, training_data = False):
-    n = int(n)
-    test_data_length = n // 5
+def get_training_data(n, test_data = False):
+    n = int(n) if test_data else None
     label_reader = LabelDataReader("training_data/train-labels-idx1-ubyte")
     labels = label_reader.read(n)
-    test_data_labels = labels[-test_data_length:]
-    labels = labels[:-test_data_length]
 
     image_reader = ImageDataReader("training_data/train-images-idx3-ubyte")
     images = image_reader.read(n)
-    test_data_images = images[-test_data_length:]
-    images = images[:-test_data_length:]
     image_size = image_reader.image_size
 
+    test_data = None
+    if test_data:
+        test_data_length = n // 5
+        test_data_labels = labels[-test_data_length:]
+        labels = labels[:-test_data_length]
+        test_data_images = images[-test_data_length:]
+        images = images[:-test_data_length:]
+        test_data = [x for x in zip(test_data_images, test_data_labels)]
+
     training_data = [x for x in zip(images, labels)]
-    test_data = [x for x in zip(test_data_images, test_data_labels)]
 
     return training_data, test_data
 
@@ -313,22 +316,46 @@ def make_config(sizes, eta, mini_batch_size, epochs):
     return config
 
 if __name__ == '__main__':
-    train = False
+    parser = argparse.ArgumentParser(description='Configure the handwriting AI')
+    parser.add_argument('-E', '--Epochs', type=int, help='Number of epochs', default=30)
+    parser.add_argument('-m', '--minibatchsize', type=int, help='Size of the minibatches', default=10)
+    parser.add_argument('-e', '--eta', type=int, help='Eta, the learning rate', default=3)
+    parser.add_argument('--hidden_layers', metavar='N', type=int, help='A list of integers representing the number of nodes in each hidden layers.', nargs='+', default=[100])
+    parser.add_argument('-c', '--config', type=str, help='The config file to use to initialize the AI or save the result of a training run', default=None)
+    parser.add_argument('--train', action='store_true', help='Use this to elect to train the AI', dest='train')
+    parser.add_argument('--no-train', action='store_false', help='Use this to elect to use the AI to predict values', dest='train')
+    args = parser.parse_args()
+
+
+    train = args.train
+    eta = args.eta
+    mini_batch_size = args.minibatchsize
+    epochs = args.Epochs
+    layers = args.hidden_layers
+    config_file = args.config
+
+    if config_file is None:
+        raise ValueError('config cannot be None')
+
     if train:
-        config = make_config(sizes = [28 * 28, 100, 10], 
-                eta = 3, mini_batch_size = 10, epochs = 30)
+        # input layers
+        layers.insert(0, 28 * 28)
+        # output layers
+        layers.append(10)
+        config = make_config(sizes = layers, 
+                eta = eta, mini_batch_size = mini_batch_size, epochs = epochs)
     else:
         config = NeuralHandwritingNetConfig()
-        config.read_config('configs/config.json')
+        config.read_config(config_file)
 
     ai = NeuralHandwritingNet(config)
 
     if train:
-        training, test = get_training_data(6e4, training_data = True)
+        training, test = get_training_data(6e4, test_data = True)
         ai.SGD(training, test_data=test)
         config.weights = ai.weights
         config.biases = ai.biases
-        config.save_config('configs/config.json')
+        config.save_config(config_file)
     else:
         test_data = get_test_data()
         ncorrect = ai.evaluate(test_data)
