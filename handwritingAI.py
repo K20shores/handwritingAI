@@ -3,6 +3,42 @@ import struct
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import random
+import codecs, json
+
+class NeuralHandwritingNetConfig:
+    def __init__(self):
+        self.sizes = None
+        self.biases = None
+        self.weights = None
+        self.mini_batch_size = None
+        self.epochs = None
+        self.eta = None
+
+    def read_config(self, file_path):
+        json_text = codecs.open(file_path, 'r', encoding='utf-8').read()
+        json_data = json.loads(json_text)
+        self.sizes = json_data['sizes']
+        self.biases = np.array(json_data['biases'])
+        self.weights = np.array(json_data['weights'])
+        self.mini_batch_size = json_data['mini_batch_size']
+        self.epochs = json_data['epochs']
+        self.eta = json_data['eta']
+
+    def save_config(self, file_path):
+        sizes = self.sizes
+        biases = [x.tolist() for x in self.biases]
+        weights = [x.tolist() for x in self.weights]
+        config = {
+                'sizes':sizes,
+                'biases': biases,
+                'weights': weights,
+                'mini_batch_size': self.mini_batch_size,
+                'epochs': self.epochs,
+                'eta': self.eta
+            }
+        json.dump(config,
+                codecs.open(file_path, 'w', encoding='utf-8'),
+                separators=(',', ':'), sort_keys=True, indent=4)
 
 class DataReader:
     def __init__(self, file_name, magic_number):
@@ -33,7 +69,6 @@ class DataReader:
 class LabelDataReader(DataReader):
     def __init__(self, file_name):
         super().__init__(file_name, 2049)
-        self.image_size = None
 
     def read(self, n = None):
         """ Read the data format. Returns a list of labels [0-9]
@@ -68,6 +103,7 @@ class LabelDataReader(DataReader):
 class ImageDataReader(DataReader):
     def __init__(self, file_name):
         super().__init__(file_name, 2051)
+        self.image_size = None
 
     def read(self, n = None):
         """ Read the data format. Returns a list of numpy 1-d arrays
@@ -84,7 +120,7 @@ class ImageDataReader(DataReader):
             n_images = n
 
         print(f"Unpacking {n_images} images")
-        print(f"Image size (row, column): ({self.image_size})")
+        print(f"Image size (row, column): {self.image_size}")
         shape = (n_images, n_columns * n_rows, 1)
         if n is None:
             images = np.reshape(self.read_all_contents(), shape) / 255
@@ -98,12 +134,14 @@ class ImageDataReader(DataReader):
         return images
 
 class NeuralHandwritingNet:
-    def __init__(self, sizes):
-        self.num_layers = len(sizes)
-        self.sizes = sizes
-        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(y, x)
-                        for x, y in zip(sizes[:-1], sizes[1:])]
+    def __init__(self, config):
+        self.num_layers = len(config.sizes)
+        self.sizes = config.sizes
+        self.biases = config.biases
+        self.weights = config.weights
+        self.eta = config.eta
+        self.mini_batch_size = config.mini_batch_size
+        self.epochs = config.epochs
 
     def evaluate(self, test_data):
         """Return the number of test inputs for which the neural
@@ -114,7 +152,7 @@ class NeuralHandwritingNet:
                         for (x, y) in test_data]
         return sum(int(x == y) for (x, y) in test_results)
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None):
+    def SGD(self, training_data, test_data=None):
         """Train the neural network using mini-batch stochastic gradient descent.  
 
         The "training_data" is a list of tuples
@@ -128,21 +166,18 @@ class NeuralHandwritingNet:
 
         if test_data: n_test = len(test_data)
         n = len(training_data)
-        #for j in tqdm(range(epochs), desc='Training batches'):
-        for j in range(epochs):
+        #for j in tqdm(range(self.epochs), desc='Training batches'):
+        for j in range(self.epochs):
             random.shuffle(training_data)
-            #mini_batches = np.reshape(training_data, (n, mini_batch_size))
-            #mini_batches = np.array_split(training_data, np.floor(n / mini_batch_size))
-            mini_batches = [training_data[k:k+mini_batch_size]
-                            for k in range(0, n, mini_batch_size)]
-            for mini_batch in mini_batches:
-                self.__update_mini_batch(mini_batch, eta)
+            mini_batches = np.array_split(training_data, np.floor(n / self.mini_batch_size))
+            for self.mini_batch in mini_batches:
+                self.__update_mini_batch()
             if test_data:
-                print(f"Epoch {j}: {self.evaluate(test_data)} / {n_test}")
+                print(f"Epoch {j}: {100*self.evaluate(test_data) / n_test}%")
             else:
                 print(f"Epoch {j} complete")
 
-    def __update_mini_batch(self, mini_batch, eta):
+    def __update_mini_batch(self):
         """Brackpopogate to update weights and biases using gradient descent
 
         Update the network's weights and biases by applying gradient descent using backpropagation to a single mini batch.
@@ -152,13 +187,13 @@ class NeuralHandwritingNet:
 
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        for x, y in mini_batch:
+        for x, y in self.mini_batch:
             delta_nabla_b, delta_nabla_w = self.__backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w-(eta/len(mini_batch))*nw 
+        self.weights = [w-(self.eta/len(self.mini_batch))*nw 
                         for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(eta/len(mini_batch))*nb 
+        self.biases = [b-(self.eta/len(self.mini_batch))*nb 
                        for b, nb in zip(self.biases, nabla_b)]
 
     def __feedforward(self, a):
@@ -238,9 +273,9 @@ def show_image_grid(data):
                 ax.set_yticks([])
     plt.show()
 
-if __name__ == '__main__':
-    n = int(6e4)
-    test_data_length = int(1e4)
+def get_training_data(n, training_data = False):
+    n = int(n)
+    test_data_length = n // 5
     label_reader = LabelDataReader("training_data/train-labels-idx1-ubyte")
     labels = label_reader.read(n)
     test_data_labels = labels[-test_data_length:]
@@ -252,10 +287,50 @@ if __name__ == '__main__':
     images = images[:-test_data_length:]
     image_size = image_reader.image_size
 
-    #show_image(np.reshape(images[0], image_reader.image_size))
-    #show_image_grid(np.reshape(images, (n, image_size[0], image_size[1])))
-
-    ai = NeuralHandwritingNet([image_size[0] * image_size[1], 10, 10])
     training_data = [x for x in zip(images, labels)]
     test_data = [x for x in zip(test_data_images, test_data_labels)]
-    ai.SGD(training_data, 30, 10, 3, test_data=test_data)
+
+    return training_data, test_data
+
+def get_test_data():
+    label_reader = LabelDataReader("test_data/t10k-labels-idx1-ubyte")
+    labels = label_reader.read()
+
+    image_reader = ImageDataReader("test_data/t10k-images-idx3-ubyte")
+    images = image_reader.read()
+
+    return [x for x in zip(images, labels)]
+
+def make_config(sizes, eta, mini_batch_size, epochs):
+    config = NeuralHandwritingNetConfig()
+    config.sizes = sizes
+    config.eta = eta
+    config.mini_batch_size = mini_batch_size
+    config.epochs = epochs
+    config.biases = [np.random.randn(y, 1) for y in sizes[1:]]
+    config.weights = [np.random.randn(y, x)
+                    for x, y in zip(sizes[:-1], sizes[1:])]
+    return config
+
+if __name__ == '__main__':
+    train = False
+    if train:
+        config = make_config(sizes = [28 * 28, 100, 10], 
+                eta = 3, mini_batch_size = 10, epochs = 30)
+    else:
+        config = NeuralHandwritingNetConfig()
+        config.read_config('configs/config.json')
+
+    ai = NeuralHandwritingNet(config)
+
+    if train:
+        training, test = get_training_data(6e4, training_data = True)
+        ai.SGD(training, test_data=test)
+        config.weights = ai.weights
+        config.biases = ai.biases
+        config.save_config('configs/config.json')
+    else:
+        test_data = get_test_data()
+        ncorrect = ai.evaluate(test_data)
+        print(f"Correctly predicted test data: {100 * ncorrect / len(test_data)}%")
+
