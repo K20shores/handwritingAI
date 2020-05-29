@@ -14,8 +14,8 @@ class NeuralHandwritingNetConfig:
         json_text = codecs.open(file_path, 'r', encoding='utf-8').read()
         json_data = json.loads(json_text)
         self.sizes = json_data['sizes']
-        self.biases = np.array(json_data['biases'])
-        self.weights = np.array(json_data['weights'])
+        self.biases = [np.array(x) for x in json_data['biases']]
+        self.weights = [np.array(x) for x in json_data['weights']]
         self.mini_batch_size = json_data['mini_batch_size']
         self.epochs = json_data['epochs']
         self.eta = json_data['eta']
