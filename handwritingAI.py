@@ -44,14 +44,14 @@ class NeuralHandwritingNet:
         for j in range(self.epochs):
             random.shuffle(training_data)
             mini_batches = np.array_split(training_data, np.floor(n / self.mini_batch_size))
-            for self.mini_batch in mini_batches:
-                self.__update_mini_batch()
+            for mini_batch in mini_batches:
+                self.__update_mini_batch(mini_batch)
             if test_data:
                 print(f"Epoch {j}: {100*self.evaluate(test_data) / n_test}%")
             else:
                 print(f"Epoch {j} complete")
 
-    def __update_mini_batch(self):
+    def __update_mini_batch(self, mini_batch):
         """Brackpopogate to update weights and biases using gradient descent
 
         Update the network's weights and biases by applying gradient descent using backpropagation to a single mini batch.
@@ -61,13 +61,13 @@ class NeuralHandwritingNet:
 
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        for x, y in self.mini_batch:
+        for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.__backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
-        self.weights = [w-(self.eta/len(self.mini_batch))*nw 
+        self.weights = [w-(self.eta/len(mini_batch))*nw 
                         for w, nw in zip(self.weights, nabla_w)]
-        self.biases = [b-(self.eta/len(self.mini_batch))*nb 
+        self.biases = [b-(self.eta/len(mini_batch))*nb 
                        for b, nb in zip(self.biases, nabla_b)]
 
     def __feedforward(self, a):
