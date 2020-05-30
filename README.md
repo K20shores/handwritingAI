@@ -15,7 +15,7 @@ The data are a part of the mnist module.
 All data is taken from the MNIST dataset curated by Yann LeCun, Corinna Cortes, and Christopher J.C. Burges from [this website](http://yann.lecun.com/exdb/mnist/).
 
 # Run
-Running `python3 handwritingAI.py --train` will train the AI with the default number of layers (1 hidden layer with 10 nodes), a learning rate of 3 (eta = 3), and a mini-batch size of 10. After the training is finished, AI's information will be saved in `configs/config.conf`.
+Running `python3 handwritingAI.py --train` will train the AI with the default number of layers (1 hidden layer with 10 nodes), a learning rate of 3 (eta = 3), and a mini-batch size of 10. After the training is finished, the AI's information will be saved in `configs/config.conf`.
 
 To use this default config file to predict against the test data, run `python3 handwritingAI.py --predict`.
 
