@@ -38,6 +38,9 @@ You can tell the program to color the images according to the how a particular A
 
 ![predicted values](https://github.com/K20shores/handwritingAI/blob/master/images/predict_100.png "Prediction results")
 
+To view the 100 images starting at the 1000th test (or training) image, run `python handwritingAI.py -c <config> -n 100 --image-display-offset 1000 --predict -d -C`.
+![predicted values starting at the 1000th test image](https://github.com/K20shores/handwritingAI/blob/master/images/predict_100_1000th.png "Prediction results")
+
 # Resources used to make thie AI.
 * Inspired by [this blog](https://towardsdatascience.com/how-to-build-your-own-neural-network-from-scratch-in-python-68998a08e4f6).
 * Program design followed from reading this online textbook [http://neuralnetworksanddeeplearning.com/chap1.html](http://neuralnetworksanddeeplearning.com/chap1.html).
