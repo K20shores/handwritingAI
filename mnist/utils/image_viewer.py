@@ -31,20 +31,18 @@ def show_image_grid(data, color = False, results = None, save = False, file_path
         image[:, :, 0] = im
         image[:, :, 1] = im
         image[:, :, 2] = im
-        image[:, :, 3] = np.ones((28, 28))
-        for i in range(28):
-            for j in range(28):
-                if color and image[i, j, 1] == 1:
-                    successful = results[idx]
-                    if successful:
-                        image[i, j, 0] = 0
-                        image[i, j, 1] = 1
-                        image[i, j, 2] = 0
-                    else:
-                        image[i, j, 0] = 1
-                        image[i, j, 1] = 0
-                        image[i, j, 2] = 0
-                    image[i, j, 3] = alpha
+        if color:
+            successful = results[idx]
+            mask = image[:, :, 0] == 1
+            if successful:
+                image[:, :, 0][mask] = 0
+                image[:, :, 1][mask] = 1
+                image[:, :, 2][mask] = 0
+            else:
+                image[:, :, 0][mask] = 1
+                image[:, :, 1][mask] = 0
+                image[:, :, 2][mask] = 0
+            image[:, :, 3][mask] = alpha
         images.append(image)
     n = len(images)
     n_rows = int(np.ceil(np.sqrt(n)))
