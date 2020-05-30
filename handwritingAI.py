@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import argparse
+import os
 
 from mnist.ai import NeuralHandwritingNet
 from mnist.utils import config as cfg
@@ -33,18 +34,22 @@ def parse_args():
             help='Use this to elect to use the AI to predict values')
 
     image = parser.add_argument_group('image drawing parameters')
-    image.add_argument('-d', '--display', type=int, dest='display', default=None, metavar='N',
-            help='Display the first N images in a grid. If both train and predit are specified, the first N images will be displayed.')
+    image.add_argument('-n', type=int, dest='n_images', default=50, metavar='N',
+            help='The number of images to pull from the dataset.')
+    image.add_argument('-d', '--display', action='store_true', dest='display',
+            help='If true, display the images in matplotlib.')
     image.add_argument('--image-display-offset', type=int, dest='image_display_offset', default=0,
             help='The number of images to skip when displaying images')
     image.add_argument('-C', '--color',  action='store_true',
             help='If displaying predicted images, color the images according to success or failure')
+    image.add_argument('--save-image', type=str, dest='save_image', default=None,
+            help='Will save the generated grid of images at the file location and name (type detected from extenstion). The file type must be valid for matplotlib. If an image is being generated for both training and predicting, -train and -predicted will be in the image path.')
 
     return parser.parse_args()
 
-def display_data(data, color = False, results = None):
+def display_data(data, color = False, results = None, save = False, file_path = None, show = False):
     data = [np.reshape(x[0], (28, 28)) for x in data]
-    show_image_grid(data, color, results)
+    show_image_grid(data, color, results, save, file_path, show)
 
 if __name__ == '__main__':
     args = parse_args()
@@ -74,8 +79,18 @@ if __name__ == '__main__':
 
     if args.train:
         if args.display is not None:
-            data, test = get_training_data(args.display, args.image_display_offset)
-            display_data(data)
+            # if we need to save the image and we are also going to save the predicted image,
+            # add -train to the image path before the extension
+            file_path = args.save_image
+            save = False
+            if args.save_image is not None:
+                if args.predict:
+                    name = os.path.basename(file_path)
+                    file_parts = os.path.splitext(file_path)
+                    file_path = f"{file_parts[0]}-train{file_parts[1]}"
+                save = True
+            data, test = get_training_data(args.n_images, args.image_display_offset)
+            display_data(data, save=save, file_path=file_path, show=args.display)
         else:
             train, test = get_training_data(include_test_data=args.test_data)
             ai.SGD(train, test_data=test)
@@ -85,9 +100,19 @@ if __name__ == '__main__':
 
     if args.predict:
         if args.display is not None:
-            data = get_test_data(args.display, args.image_display_offset)
+            data = get_test_data(args.n_images, args.image_display_offset)
             ncorrect, results = ai.evaluate(data, progress_bar=False)
-            display_data(data, args.color, results)
+            # if we need to save the image and have saved the training image,
+            # add -predicted to the image path before the extension
+            file_path = args.save_image
+            save = False
+            if args.save_image is not None:
+                if args.train:
+                    name = os.path.basename(file_path)
+                    file_parts = os.path.splitext(file_path)
+                    file_path = f"{file_parts[0]}-predicted{file_parts[1]}"
+                save = True
+            display_data(data, args.color, results, save, file_path, show=args.display)
             print(f"Correctly predicted test data: {100 * ncorrect / len(data)}%")
         else:
             data = get_test_data()

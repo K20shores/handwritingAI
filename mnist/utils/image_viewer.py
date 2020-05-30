@@ -14,7 +14,7 @@ def show_image(data):
     plt.yticks([])
     plt.show()
 
-def show_image_grid(data, color = False, results = None):
+def show_image_grid(data, color = False, results = None, save = False, file_path = 'grid.svg', show = False):
     """ Given an 3d array of pixel data, plot an grid of mnist images
 
     The data is assumed to be a 3d array where the first dimension
@@ -61,5 +61,8 @@ def show_image_grid(data, color = False, results = None):
                 ax.imshow(images[idx])
                 ax.set_xticks([])
                 ax.set_yticks([])
-    plt.show()
+    if save:
+        plt.savefig(file_path)
+    if show:
+        plt.show()
 
