@@ -18,8 +18,11 @@ class NeuralHandwritingNet:
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
-        test_results = [(np.argmax(self.__feedforward(x)), np.argmax(y))
-                        for (x, y) in test_data]
+        test_results = []
+        for x, y in tqdm(test_data, desc='Predicting'):
+            result = np.argmax(self.__feedforward(x))
+            label = np.argmax(y)
+            test_results.append((result, label))
         return sum(int(x == y) for (x, y) in test_results)
 
     def SGD(self, training_data, test_data=None):
