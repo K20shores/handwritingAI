@@ -12,10 +12,10 @@ def get_training_data(n = 6e4, test_data = False):
     """
 
     n = int(n)
-    label_reader = LabelDataReader("training_data/train-labels-idx1-ubyte")
+    label_reader = LabelDataReader("mnist/training_data/train-labels-idx1-ubyte.gz")
     labels = label_reader.read(n)
 
-    image_reader = ImageDataReader("training_data/train-images-idx3-ubyte")
+    image_reader = ImageDataReader("mnist/training_data/train-images-idx3-ubyte.gz")
     images = image_reader.read(n)
     image_size = image_reader.image_size
 
@@ -36,10 +36,10 @@ def get_test_data():
     """Return a tuple of image and label pairs
     """
 
-    label_reader = LabelDataReader("mnist/test_data/t10k-labels-idx1-ubyte")
+    label_reader = LabelDataReader("mnist/test_data/t10k-labels-idx1-ubyte.gz")
     labels = label_reader.read()
 
-    image_reader = ImageDataReader("mnist/test_data/t10k-images-idx3-ubyte")
+    image_reader = ImageDataReader("mnist/test_data/t10k-images-idx3-ubyte.gz")
     images = image_reader.read()
 
     return [x for x in zip(images, labels)]

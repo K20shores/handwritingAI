@@ -1,11 +1,12 @@
 import struct
 import numpy as np
+import gzip
 
 class DataReader:
     def __init__(self, file_name, magic_number):
         self.file_name = file_name
         self.magic_number = magic_number
-        with open(self.file_name, 'rb') as f:
+        with gzip.open(self.file_name, 'rb') as f:
             self.file_contents = f.read()
         self.offset = 0
 

@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 import random
+import sys
 
 class NeuralHandwritingNet:
     def __init__(self, config):
@@ -35,16 +36,13 @@ class NeuralHandwritingNet:
 
         if test_data: n_test = len(test_data)
         n = len(training_data)
-        #for j in tqdm(range(self.epochs), desc='Training batches'):
-        for j in range(self.epochs):
+        for j in tqdm(range(self.epochs), desc='Training mini batches', file=sys.stdout, dynamic_ncols=True):
             random.shuffle(training_data)
             mini_batches = np.array_split(training_data, np.floor(n / self.mini_batch_size))
             for mini_batch in mini_batches:
                 self.__update_mini_batch(mini_batch)
             if test_data:
                 print(f"Epoch {j}: {100*self.evaluate(test_data) / n_test}%")
-            else:
-                print(f"Epoch {j} complete")
 
     def __update_mini_batch(self, mini_batch):
         """Brackpopogate to update weights and biases using gradient descent
