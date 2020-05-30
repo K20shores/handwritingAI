@@ -30,13 +30,13 @@ To display the first 100 images with matplotlib of the training dataset, run `py
 
 To save that figure as an image, run `python handwritingAI.py -n 100 --train -d --save-image image.png`.
 
-![predicted values](https://github.com/k20shores/handwritingAI/images/train_100.png "Training Images")
+![predicted values](https://github.com/K20shores/handwritingAI/blob/master/images/train_100.png "Training Images")
 
 Similarly, to display first 100 images with matplotlib of the test dataset, run `python handwritingAI.py -n 100 --train -d`. 
 
 You can tell the program to color the images according to the how a particular AI configuration predicts the values, run `python handwritingAI.py -c <config> -n 100 --train -d -C`.
 
-![predicted values](https://github.com/k20shores/handwritingAI/images/predict_100.png "Prediction results")
+![predicted values]( https://github.com/K20shores/handwritingAI/blob/master/images/predict_100.png"Prediction results")
 
 # Resources used to make thie AI.
 * Inspired by [this blog](https://towardsdatascience.com/how-to-build-your-own-neural-network-from-scratch-in-python-68998a08e4f6).
