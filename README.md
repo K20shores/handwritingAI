@@ -36,7 +36,7 @@ Similarly, to display first 100 images with matplotlib of the test dataset, run 
 
 You can tell the program to color the images according to the how a particular AI configuration predicts the values, run `python handwritingAI.py -c <config> -n 100 --train -d -C`.
 
-![predicted values]( https://github.com/K20shores/handwritingAI/blob/master/images/predict_100.png"Prediction results")
+![predicted values](https://github.com/K20shores/handwritingAI/blob/master/images/predict_100.png"Prediction results")
 
 # Resources used to make thie AI.
 * Inspired by [this blog](https://towardsdatascience.com/how-to-build-your-own-neural-network-from-scratch-in-python-68998a08e4f6).
