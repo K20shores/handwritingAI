@@ -23,16 +23,17 @@ class DataReader:
     def read_all_contents(self):
         return list(struct.iter_unpack(">B", self.file_contents[self.offset:]))
 
-    def read_n_bytes(self, n):
-        data = struct.unpack(">" + "B" * n, self.file_contents[self.offset:self.offset+n])
-        self.offset += n
+    def read_n_bytes(self, n, offset):
+        start = self.offset + offset
+        data = struct.unpack(">" + "B" * n, self.file_contents[start:start+n])
+        self.offset += n + offset
         return data
 
 class LabelDataReader(DataReader):
     def __init__(self, file_name):
         super().__init__(file_name, 2049)
 
-    def read(self, n = None):
+    def read(self, n = None, offset=0):
         """ Read the data format. Returns a list of labels [0-9]
 
         Format is from MNIST http://yann.lecun.com/exdb/mnist/
@@ -48,7 +49,7 @@ class LabelDataReader(DataReader):
         if n is None:
             labels = np.array(self.read_all_contents())
         else:
-            labels = np.array(self.read_n_bytes(n))
+            labels = np.array(self.read_n_bytes(n, offset))
         print(f"Finished unpacking labels")
 
         if (len(labels) != data_length):
@@ -67,7 +68,7 @@ class ImageDataReader(DataReader):
         super().__init__(file_name, 2051)
         self.image_size = None
 
-    def read(self, n = None):
+    def read(self, n = None, offset=0):
         """ Read the data format. Returns a list of numpy 1-d arrays
 
         Format is from MNIST http://yann.lecun.com/exdb/mnist/
@@ -86,7 +87,7 @@ class ImageDataReader(DataReader):
         if n is None:
             images = np.reshape(self.read_all_contents(), shape) / 255
         else:
-            images = np.reshape(self.read_n_bytes(n * n_columns * n_rows), shape) / 255
+            images = np.reshape(self.read_n_bytes(n * n_columns * n_rows, offset * n_columns * n_rows), shape) / 255
         print(f"Finished unpacking images")
 
         if (len(images) != n_images):

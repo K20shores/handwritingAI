@@ -32,10 +32,8 @@ def parse_args():
     parser.set_defaults(train=None)
     return parser.parse_args()
 
-def display_data(data, n, offset):
-    images = []
-    for i in range(n):
-        images.append(np.reshape(data[i+offset][0], (28, 28)))
+def display_data(data):
+    images = [np.reshape(x[0], (28, 28)) for x in data]
     show_image_grid(images)
 
 if __name__ == '__main__':
@@ -67,8 +65,8 @@ if __name__ == '__main__':
     data = None
     if args.train:
         if args.display is not None:
-            data, test = get_training_data()
-            display_data(data, args.display, args.image_display_offset)
+            data, test = get_training_data(args.display, args.image_display_offset)
+            display_data(data)
         else:
             data, test = get_training_data()
             ai.SGD(data, test_data=test)
@@ -78,8 +76,8 @@ if __name__ == '__main__':
 
     if args.predict:
         if args.display is not None:
-            data = get_test_data()
-            display_data(data, args.display, args.image_display_offset)
+            data = get_test_data(args.display, args.image_display_offset)
+            display_data(data)
         else:
             data = get_test_data()
             ncorrect = ai.evaluate(data)
