@@ -27,10 +27,10 @@ class NeuralHandwritingNetConfig:
         self.eta = None
 
     def __repr__(self):
-        return f"Eta: {config.eta}, Epochs: {config.epochs}, Layers: {config.layers}, Mini batch size: {config.mini_batch_size}"
+        return f"Eta: {self.eta}, Epochs: {self.epochs}, Mini batch size: {self.mini_batch_size}, Layers: {self.layers}"
 
     def __str__(self):
-        return f"Eta: {config.eta}, Epochs: {config.epochs}, Layers: {config.layers}, Mini batch size: {config.mini_batch_size}"
+        return f"Eta: {self.eta}, Epochs: {self.epochs}, Mini batch size: {self.mini_batch_size}, Layers: {self.layers}"
 
     def read_config(self, file_path):
         json_text = codecs.open(file_path, 'r', encoding='utf-8').read()

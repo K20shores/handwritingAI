@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('--hidden_layers', metavar='N', type=int, help='A list of integers representing the number of nodes in each hidden layers.', nargs='+', default=[100])
     parser.add_argument('-c', '--config', type=str, help='The config file to use to initialize the AI or save the result of a training run', default=None)
     parser.add_argument('--train', action='store_true', help='Use this to elect to train the AI', dest='train')
-    parser.add_argument('--no-train', action='store_false', help='Use this to elect to use the AI to predict values', dest='train')
+    parser.add_argument('--predict', action='store_false', help='Use this to elect to use the AI to predict values', dest='train')
     parser.add_argument('-s', '--sumarize-config', help='Use this to print out stats abot the config', action='store_true', dest='summarize_config')
     parser.set_defaults(train=None)
     args = parser.parse_args()
