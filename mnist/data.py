@@ -1,6 +1,5 @@
 from .utils.data_reader import LabelDataReader
 from .utils.data_reader import ImageDataReader
-import os
 
 def get_training_data(n = 6e4, test_data = False):
     """Return a tuple of training and test data.

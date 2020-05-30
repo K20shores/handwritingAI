@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 def show_image(data):
     """ Given a 2d array of pixel data, plot an mnist image
@@ -20,7 +20,8 @@ def show_image_grid(data):
     The data is assumed to be a 3d array where the first dimension
     corresponds to the 2d array of pixel data that is an mnist image.
     """
-    n_rows = int(np.ceil(np.sqrt(data.shape[0])))
+    n = len(data)
+    n_rows = int(np.ceil(np.sqrt(n)))
     n_cols = n_rows
     fig, axs = plt.subplots(n_rows, n_cols)
 
@@ -28,7 +29,7 @@ def show_image_grid(data):
         for col in range(n_cols):
             ax = axs[row][col]
             idx = n_cols * row + col
-            if (idx >= data.shape[0]):
+            if (idx >= n):
                 ax.set_visible(False)
             else:
                 ax.imshow(data[idx], cmap='binary')

@@ -4,7 +4,7 @@ import argparse
 from mnist.ai import NeuralHandwritingNet
 from mnist.utils import config as cfg
 from mnist.utils.image_viewer import *
-from mnist import data
+from mnist.data import get_test_data, get_training_data
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Configure the handwriting AI')
@@ -24,10 +24,16 @@ def parse_args():
             help='Use this to elect to use the AI to predict values')
     parser.add_argument('-s', '--sumarize-config', action='store_true', dest='summarize_config',
             help='Use this to print out stats abot the config')
-    parser.add_argument('-d', '--display', type=int,
-            help='Display the first N images in a grid')
+    parser.add_argument('-d', '--display', type=int, dest='display', default=None,
+            help='Display the first N images in a grid. If both train and predit are specified, the first N images will be displayed.')
     parser.set_defaults(train=None)
     return parser.parse_args()
+
+def display_data(data, n):
+    images = []
+    for i in range(n):
+        images.append(np.reshape(data[i][0], (28, 28)))
+    show_image_grid(images)
 
 if __name__ == '__main__':
     args = parse_args()
@@ -55,17 +61,23 @@ if __name__ == '__main__':
 
     ai = NeuralHandwritingNet(config)
 
+    data = None
     if args.train:
-        training, test = data.get_training_data()
-        ai.SGD(training, test_data=test)
+        data, test = get_training_data()
+        if args.display is not None:
+            display_data(data, args.display)
+
+        ai.SGD(data, test_data=test)
         config.weights = ai.weights
         config.biases = ai.biases
         config.save_config(config_file)
 
-    if args.predict:
-        test_data = data.get_test_data()
-        ncorrect = ai.evaluate(test_data)
-        print(f"Correctly predicted test data: {100 * ncorrect / len(test_data)}%")
 
+    if args.predict:
+        data = get_test_data()
+        if args.display is not None:
+            display_data(data, args.display)
+        ncorrect = ai.evaluate(data)
+        print(f"Correctly predicted test data: {100 * ncorrect / len(data)}%")
 
 

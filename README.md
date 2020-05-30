@@ -1,5 +1,5 @@
 # handwritingAI
-Self-made Neural Network to classify handwritten numbers. The code
+A neural network to classify handwritten numbers. The code
 is based off of [this book by Michael Nielsen](http://neuralnetworksanddeeplearning.com/chap1.html).
 
 # Setup environment
@@ -9,7 +9,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Data
+# Data
 The data are a part of the mnist module.
 
 All data is taken from the MNIST repository training data can be found [here](http://yann.lecun.com/exdb/mnist/).
