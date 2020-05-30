@@ -26,6 +26,10 @@ def show_image_grid(data, color = False, results = None, save = False, file_path
     # if we are coloring, color correct images green and 
     # incorrect images red
     for idx, im in enumerate(data):
+        # the website that provided the data says that
+        # 0 corresponds to background (white) and 
+        # 1 correspond to foreground (black) 
+        # rgb data is the reverse of that, fix it here
         im = 1-im
         image = np.ones((28, 28, 4), dtype=np.float)
         image[:, :, 0] = im
