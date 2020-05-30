@@ -27,7 +27,8 @@ class NeuralHandwritingNet:
             result = np.argmax(self.__feedforward(x))
             label = np.argmax(y)
             test_results.append((result, label))
-        return sum(int(x == y) for (x, y) in test_results), x == y
+        results = [x == y for (x, y) in test_results]
+        return sum(1 for x in results if x), results
 
     def SGD(self, training_data, test_data=None):
         """Train the neural network using mini-batch stochastic gradient descent.  
