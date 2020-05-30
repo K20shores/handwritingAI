@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 import argparse
 
@@ -65,20 +66,22 @@ if __name__ == '__main__':
 
     data = None
     if args.train:
-        data, test = get_training_data()
         if args.display is not None:
+            data, test = get_training_data()
             display_data(data, args.display, args.image_display_offset)
         else:
+            data, test = get_training_data()
             ai.SGD(data, test_data=test)
             config.weights = ai.weights
             config.biases = ai.biases
             config.save_config(config_file)
 
     if args.predict:
-        data = get_test_data()
         if args.display is not None:
+            data = get_test_data()
             display_data(data, args.display, args.image_display_offset)
         else:
+            data = get_test_data()
             ncorrect = ai.evaluate(data)
             print(f"Correctly predicted test data: {100 * ncorrect / len(data)}%")
 
