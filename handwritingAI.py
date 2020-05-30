@@ -26,13 +26,15 @@ def parse_args():
             help='Use this to print out stats abot the config')
     parser.add_argument('-d', '--display', type=int, dest='display', default=None,
             help='Display the first N images in a grid. If both train and predit are specified, the first N images will be displayed.')
+    parser.add_argument('--image-display-offset', type=int, dest='image_display_offset', default=0,
+            help='The number of images to skip when display images')
     parser.set_defaults(train=None)
     return parser.parse_args()
 
-def display_data(data, n):
+def display_data(data, n, offset):
     images = []
     for i in range(n):
-        images.append(np.reshape(data[i][0], (28, 28)))
+        images.append(np.reshape(data[i+offset][0], (28, 28)))
     show_image_grid(images)
 
 if __name__ == '__main__':
@@ -65,19 +67,19 @@ if __name__ == '__main__':
     if args.train:
         data, test = get_training_data()
         if args.display is not None:
-            display_data(data, args.display)
-
-        ai.SGD(data, test_data=test)
-        config.weights = ai.weights
-        config.biases = ai.biases
-        config.save_config(config_file)
-
+            display_data(data, args.display, args.image_display_offset)
+        else:
+            ai.SGD(data, test_data=test)
+            config.weights = ai.weights
+            config.biases = ai.biases
+            config.save_config(config_file)
 
     if args.predict:
         data = get_test_data()
         if args.display is not None:
-            display_data(data, args.display)
-        ncorrect = ai.evaluate(data)
-        print(f"Correctly predicted test data: {100 * ncorrect / len(data)}%")
+            display_data(data, args.display, args.image_display_offset)
+        else:
+            ncorrect = ai.evaluate(data)
+            print(f"Correctly predicted test data: {100 * ncorrect / len(data)}%")
 
 
