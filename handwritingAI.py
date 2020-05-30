@@ -23,6 +23,8 @@ def parse_args():
             help='Use this to elect to train the AI. This will overwrite the config file if it exists.')
     parser.add_argument('-p', '--predict', action='store_true',
             help='Use this to elect to use the AI to predict values')
+    parser.add_argument('-T', '--test-data', action='store_true', dest='test_data',
+            help='Use this to elect to hold out 1/5th of the training data as test data to evaluate performance as the AI is trained')
     parser.add_argument('-s', '--sumarize-config', action='store_true', dest='summarize_config',
             help='Use this to print out stats abot the config')
     parser.add_argument('-d', '--display', type=int, dest='display', default=None,
@@ -62,14 +64,13 @@ if __name__ == '__main__':
 
     ai = NeuralHandwritingNet(config)
 
-    data = None
     if args.train:
         if args.display is not None:
             data, test = get_training_data(args.display, args.image_display_offset)
             display_data(data)
         else:
-            data, test = get_training_data()
-            ai.SGD(data, test_data=test)
+            train, test = get_training_data(include_test_data=args.test_data)
+            ai.SGD(train, test_data=test)
             config.weights = ai.weights
             config.biases = ai.biases
             config.save_config(config_file)
@@ -77,10 +78,11 @@ if __name__ == '__main__':
     if args.predict:
         if args.display is not None:
             data = get_test_data(args.display, args.image_display_offset)
+            _, results = ai.evaluate(data)
             display_data(data)
         else:
             data = get_test_data()
-            ncorrect = ai.evaluate(data)
+            ncorrect, _ = ai.evaluate(data)
             print(f"Correctly predicted test data: {100 * ncorrect / len(data)}%")
 
 

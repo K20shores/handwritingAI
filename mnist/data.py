@@ -1,7 +1,7 @@
 from .utils.data_reader import LabelDataReader
 from .utils.data_reader import ImageDataReader
 
-def get_training_data(n = None, offset = 0, test_data = False):
+def get_training_data(n = None, offset = 0, include_test_data = False):
     """Return a tuple of training and test data.
 
     If n is None, all data is read.
@@ -20,8 +20,8 @@ def get_training_data(n = None, offset = 0, test_data = False):
     image_size = image_reader.image_size
 
     test_data = None
-    if test_data:
-        test_data_length = n // 5
+    if include_test_data:
+        test_data_length = len(labels) // 5
         test_data_labels = labels[-test_data_length:]
         labels = labels[:-test_data_length]
         test_data_images = images[-test_data_length:]

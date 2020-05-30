@@ -13,17 +13,21 @@ class NeuralHandwritingNet:
         self.mini_batch_size = config.mini_batch_size
         self.epochs = config.epochs
 
-    def evaluate(self, test_data):
+    def evaluate(self, test_data, progress_bar = True):
         """Return the number of test inputs for which the neural
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
         test_results = []
-        for x, y in tqdm(test_data, desc='Predicting'):
+        if progress_bar:
+            iterable = tqdm(test_data, desc='Predicting', file=sys.stdout, dynamic_ncols=True) 
+        else:
+            iterable = test_data
+        for x, y in iterable:
             result = np.argmax(self.__feedforward(x))
             label = np.argmax(y)
             test_results.append((result, label))
-        return sum(int(x == y) for (x, y) in test_results)
+        return sum(int(x == y) for (x, y) in test_results), x == y
 
     def SGD(self, training_data, test_data=None):
         """Train the neural network using mini-batch stochastic gradient descent.  
@@ -39,13 +43,15 @@ class NeuralHandwritingNet:
 
         if test_data: n_test = len(test_data)
         n = len(training_data)
-        for j in tqdm(range(self.epochs), desc='Training mini batches', file=sys.stdout, dynamic_ncols=True):
+        progress_bar = tqdm(range(self.epochs), desc='Training', file=sys.stdout, dynamic_ncols=True)
+        for j in progress_bar:
             random.shuffle(training_data)
             mini_batches = np.array_split(training_data, np.floor(n / self.mini_batch_size))
             for mini_batch in mini_batches:
                 self.__update_mini_batch(mini_batch)
             if test_data:
-                print(f"Epoch {j}: {100*self.evaluate(test_data) / n_test}%")
+                success = 100 * self.evaluate(test_data, progress_bar = False)[0] / n_test
+                progress_bar.set_description(f'Training (success rate {success:.2f}%)')
 
     def __update_mini_batch(self, mini_batch):
         """Brackpopogate to update weights and biases using gradient descent
