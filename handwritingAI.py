@@ -15,7 +15,7 @@ def parse_args():
             help='Size of the minibatches')
     parser.add_argument('-e', '--eta', type=int, default=3,
             help='Eta, the learning rate')
-    parser.add_argument('--hidden_layers', metavar='N', type=int, nargs='+', default=[100],
+    parser.add_argument('-l', '--layers', metavar='N', type=int, nargs='+', default=[100],
             help='A list of integers representing the number of nodes in each hidden layers.')
     parser.add_argument('-c', '--config', type=str, default='configs/config.conf',
             help='The config file to use to initialize the AI or save the result of a training run')
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     config = None
     if args.train:
-        layers = args.hidden_layers
+        layers = args.layers
         # input layers
         layers.insert(0, 28 * 28)
         # output layers
