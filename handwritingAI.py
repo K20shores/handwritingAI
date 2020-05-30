@@ -57,7 +57,7 @@ if __name__ == '__main__':
     config_file = args.config
 
     config = None
-    if args.train and args.display is None:
+    if args.train and not args.display:
         layers = args.layers
         # input layers
         layers.insert(0, 28 * 28)
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     ai = NeuralHandwritingNet(config)
 
     if args.train:
-        if args.display is not None:
+        if args.display or args.save_image:
             # if we need to save the image and we are also going to save the predicted image,
             # add -train to the image path before the extension
             file_path = args.save_image
@@ -99,7 +99,7 @@ if __name__ == '__main__':
             config.save_config(config_file)
 
     if args.predict:
-        if args.display is not None:
+        if args.display or args.save_image:
             data = get_test_data(args.n_images, args.image_display_offset)
             ncorrect, results = ai.evaluate(data, progress_bar=False)
             # if we need to save the image and have saved the training image,
