@@ -72,6 +72,9 @@ def show_image_grid(data, color = False, results = None, save = False, file_path
                         g = rgba[x, y, 1]
                         b = rgba[x, y, 2]
                         a = rgba[x, y, 3]
+                        # options:
+                        #    1. One huge matrix that is the entire rgb image composed
+                        #    2. color each pixel individually https://stackoverflow.com/a/32649740/5217293
                         ax.scatter(px, py, color = (r, g, b, a))
 
     ax.set_xticks([])
