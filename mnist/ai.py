@@ -62,12 +62,9 @@ class NeuralHandwritingNet:
         is the learning rate.
         """
 
-        nabla_b = [np.zeros(b.shape) for b in self.biases]
-        nabla_w = [np.zeros(w.shape) for w in self.weights]
-        for x, y in mini_batch:
-            delta_nabla_b, delta_nabla_w = self.__backprop(x, y)
-            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
-            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+        X, Y = [c for c in zip(*mini_batch)]
+        #print([np.argmax(y) for y in np.hstack(Y).T])
+        nabla_b, nabla_w = self.__backprop(np.hstack(X), np.hstack(Y))
         self.weights = [w-(self.eta/len(mini_batch))*nw 
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(self.eta/len(mini_batch))*nb 
@@ -78,7 +75,7 @@ class NeuralHandwritingNet:
             a = self.__sigmoid(np.dot(w, a) + b)
         return a
 
-    def __backprop(self, x, y):
+    def __backprop(self, X, Y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
         gradient for the cost function C_x.  ``nabla_b`` and
         ``nabla_w`` are layer-by-layer lists of numpy arrays, similar
@@ -86,19 +83,19 @@ class NeuralHandwritingNet:
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
         # feedforward
-        activation = x
-        activations = [x] # list to store all the activations, layer by layer
+        activation = X
+        activations = [X] # list to store all the activations, layer by layer
         zs = [] # list to store all the z vectors, layer by layer
         for b, w in zip(self.biases, self.weights):
-            z = np.dot(w, activation)+b
+            z = np.dot(w,activation) + b
             zs.append(z)
             activation = self.__sigmoid(z)
             activations.append(activation)
         # backward pass
-        delta = self.__cost_derivative(activations[-1], y) * \
+        delta = self.__cost_derivative(activations[-1], Y) * \
             self.__sigmoid_derivative(zs[-1])
         nabla_b[-1] = delta
-        nabla_w[-1] = np.dot(delta, activations[-2].T)
+        nabla_w[-1] = np.dot(delta, activations[-2])
         # Note that the variable l in the loop below is used a little
         # differently to the notation in Chapter 2 of the book.  Here,
         # l = 1 means the last layer of neurons, l = 2 is the
