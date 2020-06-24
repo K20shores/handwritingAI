@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 import random
+random.seed(0)
 import sys
 
 class NeuralHandwritingNet:
