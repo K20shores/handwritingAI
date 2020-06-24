@@ -45,7 +45,7 @@ class NeuralHandwritingNet:
         if test_data: n_test = len(test_data)
         n = len(training_data)
         progress_bar = tqdm(range(self.epochs), desc='Training', file=sys.stdout, dynamic_ncols=True)
-        for j in progress_bar:
+        for _ in progress_bar:
             random.shuffle(training_data)
             mini_batches = np.array_split(training_data, np.floor(n / self.mini_batch_size))
             for mini_batch in mini_batches:
@@ -111,8 +111,8 @@ class NeuralHandwritingNet:
         return (nabla_b, nabla_w)
     
     def __cost_derivative(self, y_hat, y):
-        """Return the vector of partial derivatives \partial C_x /
-        \partial a for the output activations."""
+        """Return the vector of partial derivatives partial C_x /
+        partial a for the output activations."""
         return y_hat - y
 
     def __sigmoid(self, x):

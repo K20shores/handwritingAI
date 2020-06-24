@@ -5,7 +5,7 @@ import os
 
 from mnist.ai import NeuralHandwritingNet
 from mnist.utils import config as cfg
-from mnist.utils.image_viewer import *
+from mnist.utils.image_viewer import show_image_grid
 from mnist.data import get_test_data, get_training_data
 
 def parse_args():
@@ -92,7 +92,7 @@ if __name__ == '__main__':
             data, test = get_training_data(args.n_images, args.image_display_offset)
             display_data(data, save=save, file_path=file_path, show=args.display)
         else:
-            train, test = get_training_data(include_test_data=args.test_data)
+            train, test = get_training_data(args.n_images, include_test_data=args.test_data)
             ai.SGD(train, test_data=test)
             config.weights = ai.weights
             config.biases = ai.biases

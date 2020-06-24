@@ -1,4 +1,5 @@
 import numpy as np
+np.random.seed(0)
 import json, codecs
 
 def make_config(layers, eta, mini_batch_size, epochs):
