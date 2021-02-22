@@ -34,7 +34,7 @@ def parse_args():
             help='Use this to elect to use the AI to predict values')
 
     image = parser.add_argument_group('image drawing parameters')
-    image.add_argument('-n', type=int, dest='n_images', default=50, metavar='N',
+    image.add_argument('-n', type=int, dest='n_images', default=None, metavar='N',
             help='The number of images to pull from the dataset.')
     image.add_argument('-d', '--display', action='store_true', dest='display',
             help='If true, display the images in matplotlib.')

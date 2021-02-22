@@ -65,6 +65,14 @@ class NeuralHandwritingNet:
 
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
+
+        xs, ys = map(list, zip(*mini_batch))
+
+        xs = np.array(xs).T.reshape(784, 10, 1)
+        ys = np.array(ys).T.reshape(10, 10, 1)
+
+        delta_nabla_b, delta_nabla_w = self.__backprop(xs, ys)
+
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.__backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
