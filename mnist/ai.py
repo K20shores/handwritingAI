@@ -68,8 +68,8 @@ class NeuralHandwritingNet:
 
         xs, ys = map(list, zip(*mini_batch))
 
-        xs = np.array(xs).T.reshape(784, 10, 1)
-        ys = np.array(ys).T.reshape(10, 10, 1)
+        xs = np.array(xs).T.reshape(784, 10)
+        ys = np.array(ys).T.reshape(10, 10)
 
         delta_nabla_b, delta_nabla_w = self.__backprop(xs, ys)
 
@@ -99,7 +99,7 @@ class NeuralHandwritingNet:
         activations = [x] # list to store all the activations, layer by layer
         zs = [] # list to store all the z vectors, layer by layer
         for b, w in zip(self.biases, self.weights):
-            z = np.dot(w, activation)+b
+            z = np.matmul(w, activation) + b
             zs.append(z)
             activation = self.__sigmoid(z)
             activations.append(activation)
