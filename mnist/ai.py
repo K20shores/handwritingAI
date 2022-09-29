@@ -48,7 +48,7 @@ class NeuralHandwritingNet:
         progress_bar = tqdm(range(self.epochs), desc='Training', file=sys.stdout, dynamic_ncols=True)
         for j in progress_bar:
             random.shuffle(training_data)
-            mini_batches = np.array_split(training_data, np.floor(n / self.mini_batch_size))
+            mini_batches = np.array_split(training_data, np.floor(n / self.mini_batch_size), dtype="object")
             for mini_batch in mini_batches:
                 self.__update_mini_batch(mini_batch)
             if test_data:
@@ -71,12 +71,13 @@ class NeuralHandwritingNet:
         xs = np.array(xs).T.reshape(784, 10)
         ys = np.array(ys).T.reshape(10, 10)
 
-        delta_nabla_b, delta_nabla_w = self.__backprop(xs, ys)
+        nabla_b, nabla_w = self.__backprop(xs, ys)
 
-        for x, y in mini_batch:
-            delta_nabla_b, delta_nabla_w = self.__backprop(x, y)
-            nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
-            nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+        # for x, y in mini_batch:
+        #     delta_nabla_b, delta_nabla_w = self.__backprop(x, y)
+        #     nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
+        #     nabla_w = [nw+dnw for nw, dnw in zip(nabla_w, delta_nabla_w)]
+
         self.weights = [w-(self.eta/len(mini_batch))*nw 
                         for w, nw in zip(self.weights, nabla_w)]
         self.biases = [b-(self.eta/len(mini_batch))*nb 
@@ -100,6 +101,7 @@ class NeuralHandwritingNet:
         zs = [] # list to store all the z vectors, layer by layer
         for b, w in zip(self.biases, self.weights):
             z = np.matmul(w, activation) + b
+            # z = np.dot(w, activation) + b
             zs.append(z)
             activation = self.__sigmoid(z)
             activations.append(activation)
